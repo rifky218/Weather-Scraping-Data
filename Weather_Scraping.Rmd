@@ -1,0 +1,50 @@
+---
+title: "Weather Data"
+author: "Rifky - Dexibit"
+date: "7/10/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Load all the packages needed
+
+```{r}
+library(readxl)
+library(dplyr)
+library(tidyr)
+library(darksky)
+library(xts)
+library(purrr)
+library(caret)
+library(rvest)
+library(ggplot2)
+library(forecast)
+library(tseries)
+library(lubridate)
+```
+
+# Dark Sky API
+
+```{r}
+time = read_xlsx("Time.xlsx")
+
+# Latitude and Longitude of the Desired Weather Data = 29.557039, -95.106117
+
+datalist = list()
+col = c('hourly.time', 'hourly.summary', 'hourly.icon', 'hourly.precipIntensity', 'hourly.precipProbability', 'hourly.temperature', 'hourly.apparentTemperature', 'hourly.dewPoint', 'hourly.humidity', 'hourly.pressure', 'hourly.windSpeed', 'hourly.windGust', 'hourly.windBearing', 'hourly.cloudCover', 'hourly.uvIndex', 'hourly.visibility', 'daily.time',	'daily.summary', 'daily.icon', 'daily.precipIntensity', 'daily.precipProbability', 'daily.precipIntensityMax', 'daily.temperatureHigh', 'daily.apparentTemperatureHigh', 'daily.temperatureLow', 'daily.apparentTemperatureLow', 'daily.temperatureMax', 'daily.apparentTemperatureMax', 'daily.temperatureMin', 'daily.apparentTemperatureMin', 'daily.dewPoint', 'daily.humidity', 'daily.pressure', 'daily.windSpeed', 'daily.windGust', 'daily.windBearing', 'daily.cloudCover', 'daily.uvIndex', 'daily.visibility')
+
+for (i in time$Date) {
+    # ... make some data
+    dat = as.data.frame(get_forecast_for(29.557039, -95.106117, i, units = 'si'))
+    dat = dat %>% select(hourly.time, hourly.summary, hourly.icon, hourly.precipIntensity, hourly.precipProbability, hourly.temperature, hourly.apparentTemperature, hourly.dewPoint, hourly.humidity, hourly.pressure, hourly.windSpeed, hourly.windGust, hourly.windBearing, hourly.cloudCover, hourly.uvIndex, hourly.visibility, daily.time,	daily.summary, daily.icon, daily.precipIntensity, daily.precipProbability, daily.precipIntensityMax, daily.temperatureHigh, daily.apparentTemperatureHigh, daily.temperatureLow, daily.apparentTemperatureLow, daily.temperatureMax, daily.apparentTemperatureMax, daily.temperatureMin, daily.apparentTemperatureMin, daily.dewPoint, daily.humidity, daily.pressure, daily.windSpeed, daily.windGust, daily.windBearing, daily.cloudCover, daily.uvIndex, daily.visibility)
+    dat$i <- i  
+    datalist[[i]] <- dat
+}
+
+weather_data = do.call(rbind, datalist)
+rownames(weather_data) = NULL
+write.csv(weather_data, file = "weather_data.csv", row.names=FALSE)
+```
